@@ -81,6 +81,7 @@ type parser struct {
 
 func (p *parser) parse() (query.Query, error) {
 	q, err := p.doParse()
+	q.RawSQL = p.sql
 	p.err = err
 	if p.err == nil {
 		p.err = p.validate()
