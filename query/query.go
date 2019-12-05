@@ -5,6 +5,7 @@ type Query struct {
 	Type       Type
 	TableName  string
 	Conditions []Condition
+	QueryOrder *Order
 	Updates    map[string]string
 	Inserts    [][]string
 	Fields     []string // Used for SELECT (i.e. SELECTed field names) and INSERT (INSERTEDed field names)
@@ -78,4 +79,10 @@ type Condition struct {
 	Operand2 string
 	// Operand2IsField determines if Operand2 is a literal or a field name
 	Operand2IsField bool
+}
+
+//to do order
+type Order struct {
+	OrderByField string
+	OrderIsDesc  bool
 }

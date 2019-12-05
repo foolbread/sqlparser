@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/marianogappa/sqlparser/query"
+	"github.com/foolbread/sqlparser/query"
 )
 
 // Parse takes a string representing a SQL query and parses it into a query.Query struct. It may fail.
@@ -64,6 +64,10 @@ const (
 	stepWhereOperator
 	stepWhereValue
 	stepWhereAnd
+	stepOrder
+	stepOrderBy
+	stepOrderField
+	stepOrderValue
 )
 
 type parser struct {
@@ -266,10 +270,39 @@ func (p *parser) doParse() (query.Query, error) {
 		case stepWhereAnd:
 			andRWord := p.peek()
 			if strings.ToUpper(andRWord) != "AND" {
+				if p.query.Type == query.Select {
+					p.step = stepOrder
+					continue
+				}
 				return p.query, fmt.Errorf("expected AND")
 			}
 			p.pop()
 			p.step = stepWhereField
+		case stepOrder:
+			orderWord := p.peek()
+			if strings.ToUpper(orderWord) != "ORDER" {
+				return p.query, fmt.Errorf("expected ORDER")
+			}
+			p.pop()
+			p.query.QueryOrder = new(query.Order)
+			p.step = stepOrderBy
+		case stepOrderBy:
+			byWord := p.peek()
+			if strings.ToUpper(byWord) != "BY" {
+				return p.query, fmt.Errorf("expected ORDER BY's BY")
+			}
+			p.pop()
+			p.step = stepOrderField
+		case stepOrderField:
+			p.query.QueryOrder.OrderByField = p.peek()
+			p.pop()
+			p.step = stepOrderValue
+		case stepOrderValue:
+			orderVal := p.peek()
+			if strings.ToLower(orderVal) == "DESC" {
+				p.query.QueryOrder.OrderIsDesc = true
+				p.pop()
+			}
 		case stepInsertFieldsOpeningParens:
 			openingParens := p.peek()
 			if len(openingParens) != 1 || openingParens != "(" {
