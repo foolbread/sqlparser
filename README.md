@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/marianogappa/sqlparser"
+	"github.com/foolbread/sqlparser"
 )
 
 func main() {
